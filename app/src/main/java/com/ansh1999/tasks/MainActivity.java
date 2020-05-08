@@ -17,10 +17,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import static java.lang.Boolean.TRUE;
-
 public class MainActivity extends AppCompatActivity {
-    boolean service_status=true;
+    boolean service_status=false;
     Intent startIntent;
     Intent stopIntent;
     EditText edit_task;
@@ -41,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
         my_task.setText(sharedPreferences.getString("my_task",""));
 
         startIntent = new Intent(this,ForegroundService.class);
+
         stopIntent = new Intent(this,ForegroundService.class);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -90,6 +89,8 @@ public class MainActivity extends AppCompatActivity {
         switch (item.getItemId()){
             case R.id.start_stop_service:{
                 if (service_status==false){
+                    String task=sharedPreferences.getString("my_task","");
+                    startIntent.putExtra("task",task);
                     startService(startIntent);
                     item.setIcon(R.drawable.ic_notifications_active_white_24dp);
                     service_status=true;

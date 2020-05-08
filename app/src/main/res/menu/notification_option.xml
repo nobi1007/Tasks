@@ -4,7 +4,7 @@
 
     <item
         android:id="@+id/start_stop_service"
-        android:icon="@drawable/ic_notifications_active_white_24dp"
+        android:icon="@drawable/ic_notifications_off_white_24dp"
         android:title="TODO"
         android:tooltipText="Show/Hide Notification"
         app:showAsAction="always"></item>
