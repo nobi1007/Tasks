@@ -10,12 +10,15 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
 import android.text.Editable;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+
+import com.google.firebase.analytics.FirebaseAnalytics;
 
 public class MainActivity extends AppCompatActivity {
     boolean service_status=false;
@@ -26,10 +29,22 @@ public class MainActivity extends AppCompatActivity {
     Button button;
     SharedPreferences sharedPreferences;
     Editor editor;
+    private FirebaseAnalytics mFirebaseAnalytics;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
+
+        Bundle extras = getIntent().getExtras();
+        if (extras!=null) {
+            String status = extras.getString("notification_status", "0");
+            if (status.equals("0"))
+                service_status = false;
+            else if (status.equals("1"))
+                service_status = true;
+            invalidateOptionsMenu();
+        }
         edit_task=findViewById(R.id.edit_task);
         my_task=findViewById(R.id.my_task);
         button=findViewById(R.id.add_button);
@@ -39,7 +54,6 @@ public class MainActivity extends AppCompatActivity {
         my_task.setText(sharedPreferences.getString("my_task",""));
 
         startIntent = new Intent(this,ForegroundService.class);
-
         stopIntent = new Intent(this,ForegroundService.class);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -52,6 +66,9 @@ public class MainActivity extends AppCompatActivity {
                     {
                         stopService(startIntent);
                         String task=edit_task.getText().toString();
+                        Log.e("TASK",task);
+                        String arr[]=task.split("\n");
+                        Log.e("TASK ARR",arr[0]);
                         my_task.setText(task);
                         editor.putString("my_task",task);
                         editor.commit();
@@ -77,6 +94,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
     }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -104,4 +122,14 @@ public class MainActivity extends AppCompatActivity {
         }
         return true;
     }
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        MenuItem item=menu.findItem(R.id.start_stop_service);
+        if (service_status==false)
+            item.setIcon(R.drawable.ic_notifications_off_white_24dp);
+        else
+            item.setIcon(R.drawable.ic_notifications_active_white_24dp);
+        return true;
+    }
+
 }
