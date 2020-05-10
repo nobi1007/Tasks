@@ -8,4 +8,10 @@
         android:title="TODO"
         android:tooltipText="Show/Hide Notification"
         app:showAsAction="always"></item>
+    <item
+        android:id="@+id/edit_heading"
+        android:tooltipText="Edit heading"
+        android:title="Edit">
+
+    </item>
 </menu>

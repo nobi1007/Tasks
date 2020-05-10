@@ -3,6 +3,7 @@ package com.ansh1999.tasks;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -17,6 +18,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
 
@@ -29,14 +31,16 @@ public class MainActivity extends AppCompatActivity {
     Button button;
     SharedPreferences sharedPreferences;
     Editor editor;
+    TextView header;
     private FirebaseAnalytics mFirebaseAnalytics;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        service_status=isServiceRunning(ForegroundService.class);
+        invalidateOptionsMenu();
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
-
-        Bundle extras = getIntent().getExtras();
+        /*Bundle extras = getIntent().getExtras();
         if (extras!=null) {
             String status = extras.getString("notification_status", "0");
             if (status.equals("0"))
@@ -44,15 +48,16 @@ public class MainActivity extends AppCompatActivity {
             else if (status.equals("1"))
                 service_status = true;
             invalidateOptionsMenu();
-        }
+        }*/
         edit_task=findViewById(R.id.edit_task);
         my_task=findViewById(R.id.my_task);
         button=findViewById(R.id.add_button);
-        sharedPreferences = getSharedPreferences("mytask",MODE_PRIVATE);
+        header=findViewById(R.id.header);
+        sharedPreferences = getSharedPreferences("mypreferences",MODE_PRIVATE);
         editor=sharedPreferences.edit();
 
         my_task.setText(sharedPreferences.getString("my_task",""));
-
+        header.setText(sharedPreferences.getString("name","My Tasks")+"'s Tasks");
         startIntent = new Intent(this,ForegroundService.class);
         stopIntent = new Intent(this,ForegroundService.class);
         button.setOnClickListener(new View.OnClickListener() {
@@ -74,6 +79,7 @@ public class MainActivity extends AppCompatActivity {
                         editor.commit();
                         startIntent.putExtra("task",task);
                         startService(startIntent);
+                        Toast.makeText(MainActivity.this, "New tasks added", Toast.LENGTH_SHORT).show();
                     }
                 });
                 builder.setNegativeButton("No", new DialogInterface.OnClickListener()
@@ -118,6 +124,13 @@ public class MainActivity extends AppCompatActivity {
                     item.setIcon(R.drawable.ic_notifications_off_white_24dp);
                     service_status=false;
                 }
+                break;
+            }
+            case R.id.edit_heading:{
+                Intent intent = new Intent(this,Start.class);
+                editor.putBoolean("first",true);
+                editor.commit();
+                startActivity(intent);
             }
         }
         return true;
@@ -130,6 +143,13 @@ public class MainActivity extends AppCompatActivity {
         else
             item.setIcon(R.drawable.ic_notifications_active_white_24dp);
         return true;
+    }
+    private boolean isServiceRunning(Class<?> serviceClass){
+        ActivityManager manager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo serviceInfo : manager.getRunningServices(Integer.MAX_VALUE)){
+            if (serviceClass.getName().equals(serviceInfo.service.getClassName())) return true;
+        }
+        return false;
     }
 
 }
